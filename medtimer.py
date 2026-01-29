@@ -104,7 +104,7 @@ def login_page():
                 st.session_state.user = u
                 st.session_state.login_time = datetime.now()
                 st.success("Logged in successfully")
-                st.experimental_rerun()
+                st.experimental_rerun()  # This is okay now
             else:
                 st.error("Invalid credentials")
 
@@ -115,6 +115,7 @@ def login_page():
             if nu and np:
                 st.session_state.users[nu] = np
                 st.success("Account created. Login now.")
+                # No rerun here, user can manually click login
             else:
                 st.warning("Enter username & password")
 
@@ -247,3 +248,4 @@ if not st.session_state.logged_in:
     login_page()
 else:
     app()
+
