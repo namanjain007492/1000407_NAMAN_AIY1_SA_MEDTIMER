@@ -104,24 +104,24 @@ def login_page():
 
     tab1, tab2 = st.tabs(["Login", "Sign Up"])
 
+    # ---------- LOGIN ----------
     with tab1:
         u = st.text_input("Username", key="login_user")
         p = st.text_input("Password", type="password", key="login_pass")
-        login_clicked = st.button("Login", key="login_btn")
-        if login_clicked:
+        if st.button("Login", key="login_btn"):
             if u in st.session_state.users and st.session_state.users[u] == p:
                 st.session_state.logged_in = True
                 st.session_state.user = u
                 st.session_state.login_time = datetime.now()
-                st.experimental_rerun()
+                st.success("Logged in successfully!")
             else:
                 st.error("Invalid credentials")
 
+    # ---------- SIGN UP ----------
     with tab2:
         nu = st.text_input("New Username", key="signup_user")
         np = st.text_input("New Password", type="password", key="signup_pass")
-        signup_clicked = st.button("Create Account", key="signup_btn")
-        if signup_clicked:
+        if st.button("Create Account", key="signup_btn"):
             if nu and np:
                 st.session_state.users[nu] = np
                 st.success("Account created. Login now.")
@@ -130,7 +130,7 @@ def login_page():
 
 # ------------------ MAIN APP ------------------
 def app():
-    apply_theme()  # Apply theme on every run
+    apply_theme()  # Apply theme
 
     colA, colB = st.columns([2, 1])
 
@@ -237,7 +237,6 @@ def app():
     if st.sidebar.button("Logout"):
         st.session_state.logged_in = False
         st.session_state.user = None
-        st.experimental_rerun()
 
 # ------------------ RUN APP ------------------
 if st.session_state.logged_in:
