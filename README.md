@@ -113,6 +113,7 @@ UI simplicity controls
 | State Management | Streamlit Session State |
 | Date & Time      | Python `datetime`       |
 | Deployment       | Streamlit Cloud         |
+
 ⚠️ Medical Disclaimer
 
 This app is for reminder and reference purposes only.
