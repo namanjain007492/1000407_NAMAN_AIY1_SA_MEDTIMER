@@ -15,18 +15,18 @@ defaults = {
     "theme": "Light",
     "streak": 0,
     "show_mascot": True,
+    "mascot": None
 }
 for k, v in defaults.items():
     if k not in st.session_state:
         st.session_state[k] = v
 
-# ------------------ AUTO LOGOUT (48 HRS) ------------------
+# ------------------ AUTO LOGOUT ------------------
 if st.session_state.logged_in and st.session_state.login_time:
     if datetime.now() - st.session_state.login_time > timedelta(hours=48):
         st.session_state.logged_in = False
         st.session_state.user = None
         st.warning("Session expired. Please login again.")
-        st.stop()
 
 # ------------------ DATA ------------------
 QUOTES = [
@@ -96,26 +96,23 @@ def login_page():
     tab1, tab2 = st.tabs(["Login", "Sign Up"])
 
     with tab1:
-        u = st.text_input("Username")
-        p = st.text_input("Password", type="password")
+        u = st.text_input("Username", key="login_user")
+        p = st.text_input("Password", type="password", key="login_pass")
         if st.button("Login"):
             if u in st.session_state.users and st.session_state.users[u] == p:
                 st.session_state.logged_in = True
                 st.session_state.user = u
                 st.session_state.login_time = datetime.now()
-                st.success("Logged in successfully")
-                st.experimental_rerun()  # This is okay now
             else:
                 st.error("Invalid credentials")
 
     with tab2:
-        nu = st.text_input("New Username")
-        np = st.text_input("New Password", type="password")
+        nu = st.text_input("New Username", key="signup_user")
+        np = st.text_input("New Password", type="password", key="signup_pass")
         if st.button("Create Account"):
             if nu and np:
                 st.session_state.users[nu] = np
                 st.success("Account created. Login now.")
-                # No rerun here, user can manually click login
             else:
                 st.warning("Enter username & password")
 
@@ -139,8 +136,8 @@ def app():
     # -------- ADD MEDICINE --------
     with colA:
         st.subheader("➕ Add Medicine")
-        name = st.text_input("Medicine Name")
-        t = st.time_input("Time", value=time(8, 0))
+        name = st.text_input("Medicine Name", key="med_name")
+        t = st.time_input("Time", value=time(8, 0), key="med_time")
         if st.button("Add Medicine"):
             if name:
                 st.session_state.meds.append({
@@ -154,8 +151,8 @@ def app():
                 st.warning("Enter medicine name")
 
         # Mascot display
-        if st.session_state.show_mascot:
-            st.markdown(f"### {st.session_state.get('mascot', random.choice(MASCOTS))}")
+        if st.session_state.show_mascot and st.session_state.mascot:
+            st.markdown(f"### {st.session_state.mascot}")
             st.info("I'm here to remind you to take care of yourself!")
 
     # -------- MEDICINE LIST --------
@@ -176,9 +173,8 @@ def app():
             c1.write(m["name"])
             c2.write(m["time"].strftime("%I:%M %p"))
             if not m["taken"]:
-                if c3.button("✔", key=i):
+                if c3.button("✔", key=f"take_{i}"):
                     m["taken"] = True
-                    st.experimental_rerun()
             st.caption(status)
 
         # Reminder for missed meds
@@ -220,20 +216,17 @@ def app():
         "Theme", list(THEMES.keys()),
         index=list(THEMES.keys()).index(st.session_state.theme)
     )
-    if selected_theme != st.session_state.theme:
-        st.session_state.theme = selected_theme
-        st.experimental_rerun()
+    st.session_state.theme = selected_theme
 
     # Mascot selector
     mascot_option = st.sidebar.selectbox(
         "Choose Mascot", ["Random"] + MASCOTS
     )
     if mascot_option == "Random":
-        st.session_state.show_mascot = True
         st.session_state.mascot = random.choice(MASCOTS)
     else:
-        st.session_state.show_mascot = True
         st.session_state.mascot = mascot_option
+    st.session_state.show_mascot = True
 
     if st.sidebar.button("Clear All Medicines"):
         st.session_state.meds = []
@@ -241,11 +234,10 @@ def app():
 
     if st.sidebar.button("Logout"):
         st.session_state.logged_in = False
-        st.experimental_rerun()
+        st.session_state.user = None
 
-# ------------------ RUN ------------------
-if not st.session_state.logged_in:
-    login_page()
-else:
+# ------------------ RUN APP ------------------
+if st.session_state.logged_in:
     app()
-
+else:
+    login_page()
