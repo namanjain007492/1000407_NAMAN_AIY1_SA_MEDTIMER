@@ -28,14 +28,6 @@ if st.session_state.logged_in and st.session_state.login_time:
         st.warning("Session expired. Please login again.")
         st.stop()
 
-# ------------------ THEME ------------------
-if st.session_state.theme == "Dark":
-    st.markdown("""
-    <style>
-    body { background-color:#0e1117; color:white; }
-    </style>
-    """, unsafe_allow_html=True)
-
 # ------------------ DATA ------------------
 QUOTES = [
     "💙 Taking medicine is self-care.",
@@ -43,6 +35,16 @@ QUOTES = [
     "🌱 Consistency builds strength.",
     "✨ Your health matters every day.",
     "💪 Small steps, big results."
+]
+
+HEALTH_TIPS = [
+    "Drink 8 glasses of water daily! 💧",
+    "A 5-minute walk after meals improves digestion 🚶‍♂️",
+    "Good sleep = Strong immunity 😴",
+    "Eat fruits and veggies daily! 🥦🍎",
+    "Smile 😊 It's good for your heart!",
+    "Take deep breaths for stress relief 🌬️",
+    "Stretching keeps you flexible 🤸‍♂️"
 ]
 
 MED_DB = {
@@ -61,6 +63,29 @@ MED_DB = {
     "Cold & Allergy": [
         ("Cetirizine", "10mg", "Antihistamine", "Allergy relief", "Drowsy"),
     ]
+}
+
+MASCOTS = [
+    "🐢 Health Buddy", "🦊 Foxy Care", "🐼 Panda Pal", "🦄 Unicorn Helper",
+    "🐶 Doggy Doctor", "🐱 Kitty Care", "🐸 Froggy Friend", "🐵 Monkey Medic",
+    "🦋 Butterfly Wellness", "🦖 Dino Doctor", "🐰 Bunny Buddy", "🦉 Wise Owl",
+    "🦁 Lion Heart", "🐮 Moo Medic", "🐷 Piggy Care", "🐧 Penguin Pal",
+    "🦦 Otter Health", "🦈 Sharky Aid", "🐍 Snake Sage", "🐝 Bee Helper",
+    "🦗 Cricket Care", "🦔 Hedgehog Health", "🐲 Dragon Doc", "🦢 Swan Support",
+    "🐦 Birdy Buddy", "🦚 Peacock Pal", "🐴 Horse Helper", "🦓 Zebra Zen",
+    "🦄 Magical Unicorn", "🦊 Cunning Fox", "🐻 Bear Buddy", "🐨 Koala Care",
+    "🐺 Wolf Wellness", "🦁 Brave Lion", "🐵 Monkey Medic", "🐸 Frog Friend",
+    "🐧 Penguin Protector", "🦦 Otter Aid", "🐝 Busy Bee", "🦉 Owl Advisor",
+    "🦋 Butterfly Bliss", "🦄 Sparkle Unicorn", "🐶 Doggo Medic", "🐱 Kitty Comfort",
+    "🐯 Tiger Trainer", "🐴 Horse Health", "🦄 Fantasy Unicorn", "🐹 Hamster Helper",
+    "🐸 Jumping Frog"
+]
+
+THEMES = {
+    "Light": {"bg": "#ffffff", "color": "#000000"},
+    "Dark": {"bg": "#0e1117", "color": "#ffffff"},
+    "Ocean": {"bg": "#a2d5f2", "color": "#034f84"},
+    "Sunset": {"bg": "#ffadad", "color": "#4a1c40"}
 }
 
 # ------------------ LOGIN ------------------
@@ -87,12 +112,26 @@ def login_page():
         nu = st.text_input("New Username")
         np = st.text_input("New Password", type="password")
         if st.button("Create Account"):
-            st.session_state.users[nu] = np
-            st.success("Account created. Login now.")
+            if nu and np:
+                st.session_state.users[nu] = np
+                st.success("Account created. Login now.")
+            else:
+                st.warning("Enter username & password")
 
 # ------------------ MAIN APP ------------------
 def app():
     st.title("💊 MedTimer Dashboard")
+
+    # Apply theme
+    theme = THEMES.get(st.session_state.theme, THEMES["Light"])
+    st.markdown(f"""
+    <style>
+    body {{
+        background-color:{theme['bg']};
+        color:{theme['color']};
+    }}
+    </style>
+    """, unsafe_allow_html=True)
 
     colA, colB = st.columns([2, 1])
 
@@ -104,17 +143,21 @@ def app():
         t = st.time_input("Time", value=time(8, 0))
 
         if st.button("Add Medicine"):
-            st.session_state.meds.append({
-                "name": name,
-                "time": t,
-                "taken": False,
-                "date": datetime.now().date()
-            })
-            st.success("Medicine added")
+            if name:
+                st.session_state.meds.append({
+                    "name": name,
+                    "time": t,
+                    "taken": False,
+                    "date": datetime.now().date()
+                })
+                st.success(f"{name} added!")
+            else:
+                st.warning("Enter medicine name")
 
         # Mascot
         if st.session_state.show_mascot:
-            st.markdown("### 🐢 Health Buddy")
+            mascot = random.choice(MASCOTS)
+            st.markdown(f"### {mascot}")
             st.info("I'm here to remind you!")
 
     # -------- MEDICINE LIST --------
@@ -141,18 +184,25 @@ def app():
                     st.rerun()
             st.caption(status)
 
+        # Reminder for missed meds
+        for m in st.session_state.meds:
+            if not m["taken"] and datetime.now().time() > m["time"]:
+                st.warning(f"🔔 Time to take {m['name']}!")
+
     # -------- STATS --------
     total = len(st.session_state.meds)
     score = int((taken / total) * 100) if total else 0
 
     if score == 100 and total > 0:
         st.session_state.streak += 1
-    else:
+        st.balloons()
+        st.success(f"🔥 Perfect day! Streak: {st.session_state.streak}")
+    elif score < 100:
         st.session_state.streak = 0
 
     st.sidebar.metric("Adherence", f"{score}%")
     st.sidebar.metric("Streak", f"{st.session_state.streak} 🔥")
-    st.sidebar.info(random.choice(QUOTES))
+    st.sidebar.info(random.choice(QUOTES + HEALTH_TIPS))
 
     # -------- MEDICINE SUGGESTION --------
     st.sidebar.subheader("💊 Medicine Reference")
@@ -170,8 +220,8 @@ def app():
     st.sidebar.subheader("⚙️ Settings")
 
     st.session_state.theme = st.sidebar.radio(
-        "Theme", ["Light", "Dark"],
-        index=0 if st.session_state.theme == "Light" else 1
+        "Theme", list(THEMES.keys()),
+        index=list(THEMES.keys()).index(st.session_state.theme)
     )
 
     st.session_state.show_mascot = st.sidebar.checkbox(
@@ -180,7 +230,7 @@ def app():
 
     if st.sidebar.button("Clear All Medicines"):
         st.session_state.meds = []
-        st.success("Cleared")
+        st.success("Cleared all medicines")
 
     if st.sidebar.button("Logout"):
         st.session_state.logged_in = False
