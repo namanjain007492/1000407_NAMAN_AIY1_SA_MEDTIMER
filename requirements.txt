@@ -1,2 +1,6 @@
-streamlit
-pandas
+streamlit==1.53.1
+pandas==2.1.1
+requests
+streamlit-lottie
+python-dotenv
+
