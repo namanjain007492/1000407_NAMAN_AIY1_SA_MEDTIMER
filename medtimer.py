@@ -88,7 +88,7 @@ THEMES = {
     "Sunset": {"bg": "#ffadad", "color": "#4a1c40"}
 }
 
-# ------------------ LOGIN ------------------
+# ------------------ LOGIN PAGE ------------------
 def login_page():
     st.title("💊 MedTimer")
     st.subheader("Your Daily Medicine Companion")
@@ -104,7 +104,7 @@ def login_page():
                 st.session_state.user = u
                 st.session_state.login_time = datetime.now()
                 st.success("Logged in successfully")
-                st.rerun()
+                st.experimental_rerun()
             else:
                 st.error("Invalid credentials")
 
@@ -138,10 +138,8 @@ def app():
     # -------- ADD MEDICINE --------
     with colA:
         st.subheader("➕ Add Medicine")
-
         name = st.text_input("Medicine Name")
         t = st.time_input("Time", value=time(8, 0))
-
         if st.button("Add Medicine"):
             if name:
                 st.session_state.meds.append({
@@ -154,16 +152,14 @@ def app():
             else:
                 st.warning("Enter medicine name")
 
-        # Mascot
+        # Mascot display
         if st.session_state.show_mascot:
-            mascot = random.choice(MASCOTS)
-            st.markdown(f"### {mascot}")
-            st.info("I'm here to remind you!")
+            st.markdown(f"### {st.session_state.get('mascot', random.choice(MASCOTS))}")
+            st.info("I'm here to remind you to take care of yourself!")
 
     # -------- MEDICINE LIST --------
     with colB:
         st.subheader("📋 Today’s Medicines")
-
         taken = 0
         now = datetime.now().time()
 
@@ -181,7 +177,7 @@ def app():
             if not m["taken"]:
                 if c3.button("✔", key=i):
                     m["taken"] = True
-                    st.rerun()
+                    st.experimental_rerun()
             st.caption(status)
 
         # Reminder for missed meds
@@ -204,10 +200,9 @@ def app():
     st.sidebar.metric("Streak", f"{st.session_state.streak} 🔥")
     st.sidebar.info(random.choice(QUOTES + HEALTH_TIPS))
 
-    # -------- MEDICINE SUGGESTION --------
+    # -------- MEDICINE REFERENCE --------
     st.sidebar.subheader("💊 Medicine Reference")
     disease = st.sidebar.selectbox("Choose Disease", MED_DB.keys())
-
     for med in MED_DB[disease]:
         with st.sidebar.expander(med[0]):
             st.write(f"**Dosage:** {med[1]}")
@@ -219,14 +214,25 @@ def app():
     # -------- SETTINGS --------
     st.sidebar.subheader("⚙️ Settings")
 
-    st.session_state.theme = st.sidebar.radio(
+    # Theme selector
+    selected_theme = st.sidebar.radio(
         "Theme", list(THEMES.keys()),
         index=list(THEMES.keys()).index(st.session_state.theme)
     )
+    if selected_theme != st.session_state.theme:
+        st.session_state.theme = selected_theme
+        st.experimental_rerun()
 
-    st.session_state.show_mascot = st.sidebar.checkbox(
-        "Show Mascot", value=st.session_state.show_mascot
+    # Mascot selector
+    mascot_option = st.sidebar.selectbox(
+        "Choose Mascot", ["Random"] + MASCOTS
     )
+    if mascot_option == "Random":
+        st.session_state.show_mascot = True
+        st.session_state.mascot = random.choice(MASCOTS)
+    else:
+        st.session_state.show_mascot = True
+        st.session_state.mascot = mascot_option
 
     if st.sidebar.button("Clear All Medicines"):
         st.session_state.meds = []
@@ -234,7 +240,7 @@ def app():
 
     if st.sidebar.button("Logout"):
         st.session_state.logged_in = False
-        st.rerun()
+        st.experimental_rerun()
 
 # ------------------ RUN ------------------
 if not st.session_state.logged_in:
