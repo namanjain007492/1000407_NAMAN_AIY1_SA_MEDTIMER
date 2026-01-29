@@ -219,13 +219,20 @@ def app():
     st.session_state.theme = selected_theme
 
     # Mascot selector
-    mascot_option = st.sidebar.selectbox(
-        "Choose Mascot", ["Random"] + MASCOTS
-    )
-    if mascot_option == "Random":
+    if st.session_state.mascot is None:
         st.session_state.mascot = random.choice(MASCOTS)
+
+    mascot_option = st.sidebar.selectbox(
+        "Choose Mascot", ["Random"] + MASCOTS,
+        index=0 if st.session_state.mascot not in MASCOTS else MASCOTS.index(st.session_state.mascot) + 1
+    )
+
+    if mascot_option == "Random":
+        if st.session_state.mascot not in MASCOTS:
+            st.session_state.mascot = random.choice(MASCOTS)
     else:
         st.session_state.mascot = mascot_option
+
     st.session_state.show_mascot = True
 
     if st.sidebar.button("Clear All Medicines"):
