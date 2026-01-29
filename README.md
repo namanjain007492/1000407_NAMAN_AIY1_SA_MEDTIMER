@@ -144,7 +144,7 @@ Roll No: 1000407
 Class Teacher: Mrs.syedalibeema s
 Subject: Computer Science / AI
 Project: MedTimer – Daily Medicine Companion
-
+School Name: Jain Vidyalaya
 ⭐ Conclusion
 
 MedTimer turns medicine tracking into a calm, supportive daily habit instead of a stressful task.
