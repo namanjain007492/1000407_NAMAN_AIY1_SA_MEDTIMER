@@ -107,7 +107,8 @@ def login_page():
     with tab1:
         u = st.text_input("Username", key="login_user")
         p = st.text_input("Password", type="password", key="login_pass")
-        if st.button("Login"):
+        login_clicked = st.button("Login", key="login_btn")
+        if login_clicked:
             if u in st.session_state.users and st.session_state.users[u] == p:
                 st.session_state.logged_in = True
                 st.session_state.user = u
@@ -119,7 +120,8 @@ def login_page():
     with tab2:
         nu = st.text_input("New Username", key="signup_user")
         np = st.text_input("New Password", type="password", key="signup_pass")
-        if st.button("Create Account"):
+        signup_clicked = st.button("Create Account", key="signup_btn")
+        if signup_clicked:
             if nu and np:
                 st.session_state.users[nu] = np
                 st.success("Account created. Login now.")
@@ -128,7 +130,7 @@ def login_page():
 
 # ------------------ MAIN APP ------------------
 def app():
-    apply_theme()  # Apply the selected theme
+    apply_theme()  # Apply theme on every run
 
     colA, colB = st.columns([2, 1])
 
@@ -137,7 +139,7 @@ def app():
         st.subheader("➕ Add Medicine")
         name = st.text_input("Medicine Name", key="med_name")
         t = st.time_input("Time", value=time(8, 0), key="med_time")
-        if st.button("Add Medicine"):
+        if st.button("Add Medicine", key="add_med_btn"):
             if name:
                 st.session_state.meds.append({
                     "name": name,
