@@ -106,11 +106,45 @@ Logout
 Theme persistence
 
 UI simplicity controls
+| Component        | Technology              |
+| ---------------- | ----------------------- |
+| Language         | Python                  |
+| UI Framework     | Streamlit               |
+| State Management | Streamlit Session State |
+| Date & Time      | Python `datetime`       |
+| Deployment       | Streamlit Cloud         |
+⚠️ Medical Disclaimer
 
-🛠️ Technology Stack
-Component	Technology
-Language	Python
-UI Framework	Streamlit
-State Management	Streamlit Session State
-Date & Time	Python datetime
-Deployment	Streamlit Cloud
+This app is for reminder and reference purposes only.
+Always consult a doctor or pharmacist before taking any medicine.
+
+🏆 Learning Outcomes
+
+Through this project, I learned:
+
+Python application design
+
+Streamlit UI development
+
+State management
+
+User-centric design thinking
+
+Real-world problem solving
+
+. Streamlit Link
+https://medtimer-75ngd4wv3fvw4t3cd9d62y.streamlit.app/
+
+👨‍💻 Credits
+
+Name: N.Naman
+Class: 11-IB
+Roll No: 1000407
+Class Teacher: Mrs.syedalibeema s
+Subject: Computer Science / AI
+Project: MedTimer – Daily Medicine Companion
+
+⭐ Conclusion
+
+MedTimer turns medicine tracking into a calm, supportive daily habit instead of a stressful task.
+It combines simplicity, motivation, and smart tracking to promote better health outcomes.
