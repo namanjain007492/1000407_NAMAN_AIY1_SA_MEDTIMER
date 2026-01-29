@@ -72,13 +72,7 @@ MASCOTS = [
     "🦁 Lion Heart", "🐮 Moo Medic", "🐷 Piggy Care", "🐧 Penguin Pal",
     "🦦 Otter Health", "🦈 Sharky Aid", "🐍 Snake Sage", "🐝 Bee Helper",
     "🦗 Cricket Care", "🦔 Hedgehog Health", "🐲 Dragon Doc", "🦢 Swan Support",
-    "🐦 Birdy Buddy", "🦚 Peacock Pal", "🐴 Horse Helper", "🦓 Zebra Zen",
-    "🦄 Magical Unicorn", "🦊 Cunning Fox", "🐻 Bear Buddy", "🐨 Koala Care",
-    "🐺 Wolf Wellness", "🦁 Brave Lion", "🐵 Monkey Medic", "🐸 Frog Friend",
-    "🐧 Penguin Protector", "🦦 Otter Aid", "🐝 Busy Bee", "🦉 Owl Advisor",
-    "🦋 Butterfly Bliss", "🦄 Sparkle Unicorn", "🐶 Doggo Medic", "🐱 Kitty Comfort",
-    "🐯 Tiger Trainer", "🐴 Horse Health", "🦄 Fantasy Unicorn", "🐹 Hamster Helper",
-    "🐸 Jumping Frog"
+    "🐦 Birdy Buddy", "🦚 Peacock Pal", "🐴 Horse Helper", "🦓 Zebra Zen"
 ]
 
 THEMES = {
@@ -87,6 +81,21 @@ THEMES = {
     "Ocean": {"bg": "#a2d5f2", "color": "#034f84"},
     "Sunset": {"bg": "#ffadad", "color": "#4a1c40"}
 }
+
+# ------------------ THEME FUNCTION ------------------
+def apply_theme():
+    theme = THEMES.get(st.session_state.theme, THEMES["Light"])
+    st.markdown(f"""
+    <style>
+    .stApp {{
+        background-color: {theme['bg']};
+        color: {theme['color']};
+    }}
+    .css-1d391kg p, .css-1d391kg span {{
+        color: {theme['color']} !important;
+    }}
+    </style>
+    """, unsafe_allow_html=True)
 
 # ------------------ LOGIN PAGE ------------------
 def login_page():
@@ -103,6 +112,7 @@ def login_page():
                 st.session_state.logged_in = True
                 st.session_state.user = u
                 st.session_state.login_time = datetime.now()
+                st.experimental_rerun()
             else:
                 st.error("Invalid credentials")
 
@@ -118,18 +128,7 @@ def login_page():
 
 # ------------------ MAIN APP ------------------
 def app():
-    st.title("💊 MedTimer Dashboard")
-
-    # Apply theme
-    theme = THEMES.get(st.session_state.theme, THEMES["Light"])
-    st.markdown(f"""
-    <style>
-    body {{
-        background-color:{theme['bg']};
-        color:{theme['color']};
-    }}
-    </style>
-    """, unsafe_allow_html=True)
+    apply_theme()  # Apply the selected theme
 
     colA, colB = st.columns([2, 1])
 
@@ -177,11 +176,6 @@ def app():
                     m["taken"] = True
             st.caption(status)
 
-        # Reminder for missed meds
-        for m in st.session_state.meds:
-            if not m["taken"] and datetime.now().time() > m["time"]:
-                st.warning(f"🔔 Time to take {m['name']}!")
-
     # -------- STATS --------
     total = len(st.session_state.meds)
     score = int((taken / total) * 100) if total else 0
@@ -228,8 +222,7 @@ def app():
     )
 
     if mascot_option == "Random":
-        if st.session_state.mascot not in MASCOTS:
-            st.session_state.mascot = random.choice(MASCOTS)
+        st.session_state.mascot = random.choice(MASCOTS)
     else:
         st.session_state.mascot = mascot_option
 
@@ -242,6 +235,7 @@ def app():
     if st.sidebar.button("Logout"):
         st.session_state.logged_in = False
         st.session_state.user = None
+        st.experimental_rerun()
 
 # ------------------ RUN APP ------------------
 if st.session_state.logged_in:
