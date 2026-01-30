@@ -1,111 +1,103 @@
-💊 MedTimer – Daily Medicine Companion
+💊 MedTimer Pro
 
-MedTimer is a simple, user-friendly Python Streamlit application designed to help users—especially older adults—manage daily medicines safely and stress-free.
+MedTimer Pro is a smart medicine reminder and adherence tracking web application built using Python and Streamlit.
+It helps users add medicines, track daily & weekly adherence, get medicine suggestions, and manage settings with a clean UI and dark theme.
 
-The app focuses on clarity, reminders, motivation, and habit building, using clean visuals and a friendly mascot.
+This project is suitable for:
 
-🎯 Problem Statement
+🧑‍🎓 School / College submission
 
-Many people forget to take medicines on time due to:
+📊 Health-tech mini project
 
-Complex schedules
-
-Multiple daily doses
-
-Anxiety about missing medicines
-
-MedTimer solves this by providing:
-
-A clear daily checklist
-
-Visual status indicators
-
-Gentle motivation and habit tracking
-
-👥 Target Users
-
-Older adults
-
-People managing long-term medications
-
-Caregivers supporting family members
-
-Anyone who wants a simple medicine reminder app
+💻 Streamlit deployment demo
 
 🚀 Features
-🔐 Login & Security
+🔐 Authentication
 
-Login and Sign-up system
+Login & Sign Up system
 
-Auto-logout after 48 hours for safety
+Secure password hashing (SHA-256)
 
-Session-based authentication
+Session-based user login
 
-💊 Medicine Management
-
-Add daily medicines with time
-
-View today’s medicine schedule
-
-Mark medicines as Taken
-
-Automatic detection of Missed doses
-
-🎨 Visual Tracking
-
-🟢 Green – Taken
-
-🟡 Yellow – Upcoming
-
-🔴 Red – Missed
-
-📊 Adherence & Streaks
+🏠 Home Dashboard
 
 Daily adherence percentage
 
-Streak counter for full-day completion
+Weekly adherence percentage
 
-Encourages habit formation
+List of today’s medicines
 
-🧸 Mascot Companion
+One-click Taken checkbox
 
-Friendly Turtle mascot 🐢
+Celebration animation 🎉 after taking medicine
 
-Acts as a visual companion
+Motivational health message
 
-Can be enabled/disabled in settings
+💊 Medicine Management
 
-💡 Motivation System
+Add medicine (name, time, dose)
 
-Random motivational health messages
+Edit existing medicines
 
-Encourages consistency and confidence
+Delete medicines
 
-💊 Medicine Suggestions (Reference Only)
+Medicines persist during session
 
-Disease-based medicine reference
+Clean expandable edit UI
 
-Dosage information
+🧠 Medicine Suggestions
 
-Medicine type
+Disease-based medicine suggestions
 
-Pros & Cons
+Each disease shows:
 
-Safety disclaimer included
+Recommended medicine
 
-⚙️ Settings (15+ Options)
+Pros
 
-Light / Dark mode
+Cons
 
-Mascot toggle
+One-click add suggested medicine
 
-Clear all medicines
+Supported diseases:
 
-Logout
+Fever
 
-Theme persistence
+Cold
 
-UI simplicity controls
+Headache
+
+Diabetes
+
+Blood Pressure
+
+⚙️ Settings
+
+Dark / Light theme toggle (default: Dark)
+
+Mascot selection (🩺 🐶 🐱 🐼 🦊)
+
+Celebration on/off toggle
+
+Reset all medicines
+
+Logout button
+
+All settings work in single click
+
+🎨 UI & Theme
+
+Default Dark Mode
+
+Responsive wide layout
+
+Sidebar navigation
+
+Emoji-based friendly design
+
+Single-click interaction (no double click issues)
+
 | Component        | Technology              |
 | ---------------- | ----------------------- |
 | Language         | Python                  |
@@ -114,27 +106,88 @@ UI simplicity controls
 | Date & Time      | Python `datetime`       |
 | Deployment       | Streamlit Cloud         |
 
+🧪 How the App Works (Flow)
+
+User opens app
+
+Login or create new account
+
+Navigate using sidebar:
+
+Home
+
+Medicines
+
+Suggestions
+
+Settings
+
+Add medicines & mark as taken
+
+View adherence automatically
+
+Customize theme & mascot
+
+Logout safely
+
+🔐 Security
+
+Passwords are never stored in plain text
+
+Uses SHA-256 hashing
+
+Session state isolation per user
+
+🎯 Purpose of This App
+
+The purpose of MedTimer Pro is to help users manage their medicines effectively and safely by:
+
+⏰ Reminding users to take medicines on time
+
+✅ Tracking whether medicines are taken or missed
+
+📊 Calculating daily and weekly adherence percentages
+
+🧠 Providing basic medicine suggestions for common diseases
+
+🎨 Allowing personalization through themes and mascots
+
+💙 Encouraging healthy habits with motivational messages
+
+This app is designed to improve medication discipline, reduce missed doses, and promote better health awareness using a simple and user-friendly interface.
+
 ⚠️ Medical Disclaimer
 
 This app is for reminder and reference purposes only.
 Always consult a doctor or pharmacist before taking any medicine.
 
-🏆 Learning Outcomes
+. Drive Link
 
-Through this project, I learned:
-
-Python application design
-
-Streamlit UI development
-
-State management
-
-User-centric design thinking
-
-Real-world problem solving
+https://drive.google.com/drive/folders/1F1aGGdx79-INZ3-at21wR2wTT5IzvlcV?usp=sharing
 
 . Streamlit Link
+
 https://medtimer-75ngd4wv3fvw4t3cd9d62y.streamlit.app/
+
+🧪 Tested By
+
+This application was tested by the developer, along with one family member and a friend, to ensure:
+
+Proper functioning of all features
+
+Smooth single-click interactions
+
+Correct medicine tracking and adherence calculations
+
+Accurate theme and settings behavior
+
+Overall usability and user experience
+
+Testing Method:
+
+Manual testing
+
+Real-user interaction testing
 
 👨‍💻 Credits
 
@@ -145,6 +198,7 @@ Class Teacher: Mrs.syedalibeema s
 Subject: Computer Science / AI
 Project: MedTimer – Daily Medicine Companion
 School Name: Jain Vidyalaya
+
 ⭐ Conclusion
 
 MedTimer turns medicine tracking into a calm, supportive daily habit instead of a stressful task.
