@@ -1,44 +1,69 @@
 import streamlit as st
-import pandas as pd
-from datetime import datetime, date, time
-import uuid
+from datetime import date, timedelta
+import hashlib
 
-# ---------------- CONFIG ----------------
-st.set_page_config(page_title="MedTimer PRO", layout="wide")
+# ================== PAGE CONFIG ==================
+st.set_page_config(page_title="MedTimer Pro", layout="wide")
 
-# ---------------- SESSION INIT ----------------
+# ================== SESSION INIT ==================
 def init_state():
-    defaults = {
-        "logged_in": False,
+    return {
         "users": {},
+        "logged_in": False,
         "current_user": None,
-        "theme": "Light",
-        "mascot": "🐢 Turtle",
-        "meds": [],
-        "edit_med_id": None
+        "theme": "Dark",
+        "mascot": "🩺",
+        "medicines": [],
+        "taken": {},
+        "celebrate": True
     }
-    for k, v in defaults.items():
-        if k not in st.session_state:
-            st.session_state[k] = v
 
-init_state()
+if "app" not in st.session_state:
+    st.session_state.app = init_state()
 
-# ---------------- THEME ----------------
+# ================== THEME FUNCTION ==================
 def apply_theme():
-    if st.session_state.theme == "Dark":
+    theme = st.session_state.app["theme"]
+    if theme == "Dark":
         st.markdown("""
         <style>
-        body { background:#0e1117; color:white; }
-        .stButton>button { width:100%; }
+        .stApp { background-color:#0f172a; color:white; }
+        </style>
+        """, unsafe_allow_html=True)
+    else:
+        st.markdown("""
+        <style>
+        .stApp { background-color:white; color:black; }
         </style>
         """, unsafe_allow_html=True)
 
 apply_theme()
 
-# ---------------- LOGIN ----------------
-def login_page():
-    st.title("💊 MedTimer PRO")
-    st.caption("Professional Medicine Adherence Tracker")
+# ================== HELPERS ==================
+def hash_pw(pw):
+    return hashlib.sha256(pw.encode()).hexdigest()
+
+def today_key():
+    return str(date.today())
+
+def daily_adherence():
+    meds = st.session_state.app["medicines"]
+    taken = st.session_state.app["taken"].get(today_key(), [])
+    return (len(taken) / len(meds) * 100) if meds else 0
+
+def weekly_adherence():
+    meds = st.session_state.app["medicines"]
+    if not meds:
+        return 0
+    total = 0
+    for i in range(7):
+        d = str(date.today() - timedelta(days=i))
+        total += len(st.session_state.app["taken"].get(d, [])) / len(meds) * 100
+    return total / 7
+
+# ================== LOGIN / SIGNUP ==================
+if not st.session_state.app["logged_in"]:
+    st.title("💊 MedTimer Pro")
 
     tab1, tab2 = st.tabs(["Login", "Sign Up"])
 
@@ -46,9 +71,10 @@ def login_page():
         u = st.text_input("Username")
         p = st.text_input("Password", type="password")
         if st.button("Login"):
-            if u in st.session_state.users and st.session_state.users[u] == p:
-                st.session_state.logged_in = True
-                st.session_state.current_user = u
+            if u in st.session_state.app["users"] and st.session_state.app["users"][u] == hash_pw(p):
+                st.session_state.app["logged_in"] = True
+                st.session_state.app["current_user"] = u
+                st.success("Logged in successfully")
             else:
                 st.error("Invalid credentials")
 
@@ -56,133 +82,119 @@ def login_page():
         nu = st.text_input("New Username")
         np = st.text_input("New Password", type="password")
         if st.button("Create Account"):
-            if nu and np:
-                st.session_state.users[nu] = np
-                st.success("Account created. Login now.")
+            if nu in st.session_state.app["users"]:
+                st.error("User already exists")
             else:
-                st.warning("Fill all fields")
+                st.session_state.app["users"][nu] = hash_pw(np)
+                st.success("Account created! Please login")
 
-# ---------------- DASHBOARD ----------------
-def dashboard():
-    st.title("💊 MedTimer Dashboard")
+    st.stop()
 
-    # -------- SIDEBAR --------
-    with st.sidebar:
-        st.header("⚙ Settings")
+# ================== SIDEBAR ==================
+st.sidebar.title(f"{st.session_state.app['mascot']} MedTimer")
 
-        st.session_state.theme = st.selectbox(
-            "Theme", ["Light", "Dark"],
-            index=0 if st.session_state.theme == "Light" else 1
-        )
+menu = st.sidebar.radio(
+    "Menu",
+    ["Home", "Medicines", "Suggestions", "Settings"]
+)
 
-        st.session_state.mascot = st.selectbox(
-            "Mascot", ["🐢 Turtle", "🐶 Dog", "🐱 Cat", "🦁 Lion", "🐼 Panda"]
-        )
+# ================== HOME ==================
+if menu == "Home":
+    st.title("🏠 Home")
 
-        if st.button("Logout"):
-            st.session_state.logged_in = False
-            st.session_state.current_user = None
+    st.metric("Daily Adherence", f"{daily_adherence():.0f}%")
+    st.metric("Weekly Adherence", f"{weekly_adherence():.0f}%")
+
+    st.subheader("Today's Medicines")
+
+    for i, m in enumerate(st.session_state.app["medicines"]):
+        checked = m["name"] in st.session_state.app["taken"].get(today_key(), [])
+        if st.checkbox(f"{m['name']} – {m['dose']} at {m['time']}", value=checked, key=f"take{i}"):
+            if not checked:
+                st.session_state.app["taken"].setdefault(today_key(), []).append(m["name"])
+                if st.session_state.app["celebrate"]:
+                    st.balloons()
+
+# ================== MEDICINES ==================
+elif menu == "Medicines":
+    st.title("💊 Medicines")
+
+    with st.form("add_med"):
+        n = st.text_input("Medicine Name")
+        t = st.time_input("Time")
+        d = st.text_input("Dose")
+        if st.form_submit_button("Add Medicine"):
+            st.session_state.app["medicines"].append({
+                "name": n,
+                "time": str(t),
+                "dose": d
+            })
+            st.success("Medicine added")
+
+    for i, m in enumerate(st.session_state.app["medicines"]):
+        with st.expander(m["name"]):
+            m["name"] = st.text_input("Name", m["name"], key=f"n{i}")
+            m["time"] = st.text_input("Time", m["time"], key=f"t{i}")
+            m["dose"] = st.text_input("Dose", m["dose"], key=f"d{i}")
+            if st.button("Delete", key=f"del{i}"):
+                st.session_state.app["medicines"].pop(i)
+                st.warning("Deleted")
+
+# ================== SUGGESTIONS ==================
+elif menu == "Suggestions":
+    st.title("🧠 Medicine Suggestions")
+
+    data = {
+        "Fever": ("Paracetamol", "Reduces fever", "Liver risk"),
+        "Cold": ("Cetirizine", "Relieves allergy", "Drowsiness"),
+        "Headache": ("Ibuprofen", "Pain relief", "Stomach upset"),
+        "Diabetes": ("Metformin", "Controls sugar", "Nausea"),
+        "Blood Pressure": ("Amlodipine", "Controls BP", "Dizziness")
+    }
+
+    disease = st.selectbox("Select Disease", list(data))
+    med, pros, cons = data[disease]
+
+    st.write(f"**Medicine:** {med}")
+    st.write(f"✅ Pros: {pros}")
+    st.write(f"⚠️ Cons: {cons}")
+
+    if st.button("Add this medicine"):
+        st.session_state.app["medicines"].append({
+            "name": med,
+            "time": "09:00",
+            "dose": "Standard"
+        })
+        st.success("Added")
+
+# ================== SETTINGS ==================
+elif menu == "Settings":
+    st.title("⚙️ Settings")
+
+    st.session_state.app["theme"] = st.selectbox(
+        "Theme",
+        ["Dark", "Light"],
+        index=["Dark", "Light"].index(st.session_state.app["theme"])
+    )
+
+    st.session_state.app["mascot"] = st.selectbox(
+        "Mascot",
+        ["🩺", "🐶", "🐱", "🐼", "🦊"],
+        index=["🩺", "🐶", "🐱", "🐼", "🦊"].index(st.session_state.app["mascot"])
+    )
+
+    st.session_state.app["celebrate"] = st.checkbox(
+        "Celebrate on medicine taken",
+        value=st.session_state.app["celebrate"]
+    )
 
     apply_theme()
 
-    # -------- ADD / EDIT MED --------
-    if st.session_state.edit_med_id is None:
-        st.subheader("➕ Add Medicine")
+    if st.button("Reset All Medicines"):
+        st.session_state.app["medicines"].clear()
+        st.session_state.app["taken"].clear()
+        st.warning("All medicines reset")
 
-        with st.form("add_med_form", clear_on_submit=True):
-            name = st.text_input("Medicine Name")
-            t = st.time_input("Time", value=time(8, 0))
-            submit = st.form_submit_button("Add Medicine")
-
-            if submit and name:
-                st.session_state.meds.append({
-                    "id": str(uuid.uuid4()),
-                    "name": name,
-                    "time": t.strftime("%H:%M"),
-                    "taken": False,
-                    "date": str(date.today())
-                })
-    else:
-        med = next(m for m in st.session_state.meds if m["id"] == st.session_state.edit_med_id)
-
-        st.subheader("✏ Edit Medicine")
-        with st.form("edit_med_form"):
-            new_name = st.text_input("Medicine Name", med["name"])
-            new_time = st.text_input("Time (HH:MM)", med["time"])
-            save = st.form_submit_button("Save")
-            cancel = st.form_submit_button("Cancel")
-
-            if save:
-                med["name"] = new_name
-                med["time"] = new_time
-                st.session_state.edit_med_id = None
-
-            if cancel:
-                st.session_state.edit_med_id = None
-
-    st.divider()
-
-    # -------- MED LIST --------
-    st.subheader("📋 Today’s Medicines")
-
-    if not st.session_state.meds:
-        st.info("No medicines added yet.")
-    else:
-        for med in st.session_state.meds:
-            c1, c2, c3, c4, c5 = st.columns([3,2,2,1,1])
-
-            c1.write(med["name"])
-            c2.write(med["time"])
-
-            med["taken"] = c3.checkbox(
-                "Taken",
-                med["taken"],
-                key=f"taken_{med['id']}"
-            )
-
-            if c4.button("✏", key=f"edit_{med['id']}"):
-                st.session_state.edit_med_id = med["id"]
-
-            if c5.button("🗑", key=f"del_{med['id']}"):
-                st.session_state.meds = [m for m in st.session_state.meds if m["id"] != med["id"]]
-                st.session_state.edit_med_id = None
-                st.stop()
-
-    # -------- MARK ALL --------
-    if st.session_state.meds:
-        if st.button("✅ Mark All Taken"):
-            for m in st.session_state.meds:
-                m["taken"] = True
-
-    # -------- ADHERENCE --------
-    if st.session_state.meds:
-        df = pd.DataFrame(st.session_state.meds)
-        total = len(df)
-        taken = df["taken"].sum()
-        daily = int((taken / total) * 100)
-
-        st.subheader("📊 Daily Adherence")
-        st.progress(daily)
-        st.write(f"**{daily}% completed today**")
-
-        st.subheader("📅 Weekly Adherence")
-        weekly = df.groupby("date")["taken"].mean() * 100
-        st.line_chart(weekly)
-
-    # -------- MASCOT --------
-    st.subheader("🐾 Mascot Feedback")
-
-    if not st.session_state.meds:
-        st.info(f"{st.session_state.mascot} says: Add medicines to start!")
-    elif daily == 100:
-        st.success(f"{st.session_state.mascot} is SUPER proud of you 🎉")
-    elif daily >= 50:
-        st.warning(f"{st.session_state.mascot} says: Keep going!")
-    else:
-        st.error(f"{st.session_state.mascot} says: Don’t miss your meds!")
-
-# ---------------- RUN ----------------
-if not st.session_state.logged_in:
-    login_page()
-else:
-    dashboard()
+    if st.button("Logout"):
+        st.session_state.clear()
+        st.success("Logged out")
